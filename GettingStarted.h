@@ -4,6 +4,7 @@
 #include <print>
 #include <string_view>
 #include <string>
+#include "Shader.h"
 namespace GettingStarted
 {
     class GetStart
@@ -16,10 +17,16 @@ namespace GettingStarted
         void HelloTriangleExer1();
         void HelloTriangleExer2();
         void HelloTriangleExer3();
+        void TriangleChangingColor();
+        void TriangleRainbow();
+        void UpSideDownTriangle();
+        void XOffset();
+        void outputVerPostoFrag();
     private:
         GLFWwindow* m_window;
         static void framebuffer_size_callback(GLFWwindow* window, int width, int height) noexcept;
         bool isWindowRunning() const noexcept{ return glfwWindowShouldClose(m_window);};
         static void printCurrentUseGPU() noexcept;
+
     };
 };

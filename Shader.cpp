@@ -90,7 +90,8 @@ std::string Shader::readShaderFile(const char* filePath)
 	{
 		// Open at the end (ate) to get position immediately
 		// in => I want to read from this file, ate (At The End) => cursor at the end
-		file.open(filePath, std::ios::in | std::ios::ate);
+		// ADD std::ios::binary to ensure tellg() matches read() size on Windows
+		file.open(filePath, std::ios::in | std::ios::ate | std::ios::binary);
 		// 1. Get file size
 		// tellg() => get size of the current byte index of the cursor
 		std::streamsize size = file.tellg();
