@@ -40,6 +40,17 @@ Texture::Texture(const char* image, GLenum texType, GLenum slot, GLenum pixelTyp
 
 	stbi_image_free(bytes);
 }
+void Texture::setFilterTexture(GLint filter1, GLint filter2)
+{
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, filter1);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, filter2);
+}
+
+void Texture::setFilterMipMap(GLint filter1, GLint filter2)
+{
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter1);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter2);
+}
 
 void Texture::setActiveTexture(GLenum slot)
 {

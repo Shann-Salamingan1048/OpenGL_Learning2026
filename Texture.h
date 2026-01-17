@@ -9,6 +9,8 @@ public:
 	Texture(const char* image, GLenum texType, GLenum slot, GLenum pixelType, bool verticalEnable);
 
 	void setActiveTexture(GLenum slot);
+	void setFilterMipMap(GLint filer1, GLint filter2);
+	void setFilterTexture(GLint filer1, GLint filter2);
 	// Binds a texture
 	void Bind();
 	// Unbinds a texture

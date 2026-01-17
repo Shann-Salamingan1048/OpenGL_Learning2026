@@ -39,6 +39,239 @@ void GetStart::framebuffer_size_callback(GLFWwindow* window, int width, int heig
 {
     glViewport(0, 0, width, height);
 }
+void GetStart::containerWithAwesomeFaceTextureUniformMix3rdPara()
+{
+    printCurrentUseGPU();
+    GLfloat vertices[] = {
+        // positions          // colors           // texture coords
+        0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
+        0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
+       -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
+       -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left
+   };
+    GLuint indices[] =
+    {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
+
+    Shader shaderProgram("glsl/gettingStarted/containerWithAwesomeFaceTextureUniformMix3rdPara.vert", "glsl/gettingStarted/containerWithAwesomeFaceTextureUniformMix3rdPara.frag");
+    VAO vao;
+    vao.Bind();
+    VBO vbo(vertices, sizeof(vertices));
+    EBO ebo(indices, sizeof(indices));
+    vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+    vao.LinkAttrib(vbo, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    vao.LinkAttrib(vbo, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    vao.Unbind();
+    vbo.Unbind();
+    ebo.Unbind();
+
+    // Texture
+    std::string container = "pics/gettingstarted/container.jpg";
+    std::string awesomeFace = "pics/gettingstarted/awesomeface.png";
+    Texture text1(container.c_str(),GL_TEXTURE_2D ,GL_TEXTURE0,GL_UNSIGNED_BYTE, true);
+    Texture text2(awesomeFace.c_str(),GL_TEXTURE_2D ,GL_TEXTURE1,GL_UNSIGNED_BYTE, true);
+    shaderProgram.use();
+    shaderProgram.setInt("texture1",0);
+    shaderProgram.setInt("texture2",1);
+    shaderProgram.setFloat("mixThirdPara", 0.5);
+    while (!isWindowRunning())
+    {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        shaderProgram.use();
+        vao.Bind();
+
+        glDrawElements(GL_TRIANGLES,6 ,GL_UNSIGNED_INT,nullptr);
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
+    }
+    vao.Delete();
+    vbo.Delete();
+    ebo.Delete();
+    shaderProgram.deleteShader();
+    text1.Delete();
+    text2.Delete();
+    glfwTerminate();
+}
+void GetStart::containerWithAwesomeFaceTextureDisplayCenterPixel()
+{
+    printCurrentUseGPU();
+    GLfloat vertices[] = {
+        // positions          // colors           // texture coords (note that we changed them to 'zoom in' on our texture image)
+        0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   0.55f, 0.55f, // top right
+        0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   0.55f, 0.45f, // bottom right
+       -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.45f, 0.45f, // bottom left
+       -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.45f, 0.55f  // top left
+   };
+    GLuint indices[] =
+    {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
+
+    Shader shaderProgram("glsl/gettingStarted/containerWithAwesomeFaceTextureDisplayCenterPixel.vert", "glsl/gettingStarted/containerWithAwesomeFaceTextureDisplayCenterPixel.frag");
+    VAO vao;
+    vao.Bind();
+    VBO vbo(vertices, sizeof(vertices));
+    EBO ebo(indices, sizeof(indices));
+    vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+    vao.LinkAttrib(vbo, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    vao.LinkAttrib(vbo, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    vao.Unbind();
+    vbo.Unbind();
+    ebo.Unbind();
+
+    // Texture
+    std::string container = "pics/gettingstarted/container.jpg";
+    std::string awesomeFace = "pics/gettingstarted/awesomeface.png";
+    Texture text1(container.c_str(),GL_TEXTURE_2D ,GL_TEXTURE0,GL_UNSIGNED_BYTE, true);
+    text1.setFilterTexture(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+    text1.setFilterMipMap(GL_NEAREST, GL_NEAREST);
+    Texture text2(awesomeFace.c_str(),GL_TEXTURE_2D ,GL_TEXTURE1,GL_UNSIGNED_BYTE, true);
+    text2.setFilterTexture(GL_REPEAT, GL_REPEAT);
+    text2.setFilterMipMap(GL_NEAREST, GL_NEAREST);
+    shaderProgram.use();
+    shaderProgram.setInt("texture1",0);
+    shaderProgram.setInt("texture2",1);
+    while (!isWindowRunning())
+    {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        shaderProgram.use();
+        vao.Bind();
+
+        glDrawElements(GL_TRIANGLES,6 ,GL_UNSIGNED_INT,nullptr);
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
+    }
+    vao.Delete();
+    vbo.Delete();
+    ebo.Delete();
+    shaderProgram.deleteShader();
+    text1.Delete();
+    text2.Delete();
+    glfwTerminate();
+}
+void GetStart::containerWithAwesomeFaceTexture4Smiley()
+{
+    printCurrentUseGPU();
+    GLfloat vertices[] = {
+        // positions          // colors           // texture coords
+        0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   2.0f, 2.0f, // top right
+        0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   2.0f, 0.0f, // bottom right
+       -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
+       -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 2.0f  // top left
+   };
+    GLuint indices[] =
+    {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
+
+    Shader shaderProgram("glsl/gettingStarted/containerWithAwesomeFaceTexture4Smiley.vert", "glsl/gettingStarted/containerWithAwesomeFaceTexture4Smiley.frag");
+    VAO vao;
+    vao.Bind();
+    VBO vbo(vertices, sizeof(vertices));
+    EBO ebo(indices, sizeof(indices));
+    vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+    vao.LinkAttrib(vbo, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    vao.LinkAttrib(vbo, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    vao.Unbind();
+    vbo.Unbind();
+    ebo.Unbind();
+
+    // Texture
+    std::string container = "pics/gettingstarted/container.jpg";
+    std::string awesomeFace = "pics/gettingstarted/awesomeface.png";
+    Texture text1(container.c_str(),GL_TEXTURE_2D ,GL_TEXTURE0,GL_UNSIGNED_BYTE, true);
+    text1.setFilterTexture(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+    text1.setFilterMipMap(GL_LINEAR, GL_LINEAR);
+    Texture text2(awesomeFace.c_str(),GL_TEXTURE_2D ,GL_TEXTURE1,GL_UNSIGNED_BYTE, true);
+    text2.setFilterTexture(GL_REPEAT, GL_REPEAT);
+    text2.setFilterMipMap(GL_LINEAR, GL_LINEAR);
+    shaderProgram.use();
+    shaderProgram.setInt("texture1",0);
+    shaderProgram.setInt("texture2",1);
+    while (!isWindowRunning())
+    {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        shaderProgram.use();
+        vao.Bind();
+
+        glDrawElements(GL_TRIANGLES,6 ,GL_UNSIGNED_INT,nullptr);
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
+    }
+    vao.Delete();
+    vbo.Delete();
+    ebo.Delete();
+    shaderProgram.deleteShader();
+    text1.Delete();
+    text2.Delete();
+    glfwTerminate();
+}
+void GetStart::containerWithAwesomeFaceTextureLookReverse()
+{
+    printCurrentUseGPU();
+    GLfloat vertices[] = {
+        // positions          // colors           // texture coords
+        0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
+        0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
+       -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
+       -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left
+   };
+    GLuint indices[] =
+    {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
+
+    Shader shaderProgram("glsl/gettingStarted/containerWithAwesomeFaceTextureLookReverse.vert", "glsl/gettingStarted/containerWithAwesomeFaceTextureLookReverse.frag");
+    VAO vao;
+    vao.Bind();
+    VBO vbo(vertices, sizeof(vertices));
+    EBO ebo(indices, sizeof(indices));
+    vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+    vao.LinkAttrib(vbo, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    vao.LinkAttrib(vbo, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    vao.Unbind();
+    vbo.Unbind();
+    ebo.Unbind();
+
+    // Texture
+    std::string container = "pics/gettingstarted/container.jpg";
+    std::string awesomeFace = "pics/gettingstarted/awesomeface.png";
+    Texture text1(container.c_str(),GL_TEXTURE_2D ,GL_TEXTURE0,GL_UNSIGNED_BYTE, true);
+    Texture text2(awesomeFace.c_str(),GL_TEXTURE_2D ,GL_TEXTURE1,GL_UNSIGNED_BYTE, true);
+    shaderProgram.use();
+    shaderProgram.setInt("texture1",0);
+    shaderProgram.setInt("texture2",1);
+    while (!isWindowRunning())
+    {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        shaderProgram.use();
+        vao.Bind();
+
+        glDrawElements(GL_TRIANGLES,6 ,GL_UNSIGNED_INT,nullptr);
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
+    }
+    vao.Delete();
+    vbo.Delete();
+    ebo.Delete();
+    shaderProgram.deleteShader();
+    text1.Delete();
+    text2.Delete();
+    glfwTerminate();
+}
 void GetStart::containerWithAwesomeFaceTexture1()
 {
     printCurrentUseGPU();
@@ -70,8 +303,8 @@ void GetStart::containerWithAwesomeFaceTexture1()
     // Texture
     std::string container = "pics/gettingstarted/container.jpg";
     std::string awesomeFace = "pics/gettingstarted/awesomeface.png";
-    Texture text1(container.c_str(),GL_TEXTURE_2D ,GL_TEXTURE0,GL_UNSIGNED_BYTE, false);
-    Texture text2(awesomeFace.c_str(),GL_TEXTURE_2D ,GL_TEXTURE1,GL_UNSIGNED_BYTE, false);
+    Texture text1(container.c_str(),GL_TEXTURE_2D ,GL_TEXTURE0,GL_UNSIGNED_BYTE, true);
+    Texture text2(awesomeFace.c_str(),GL_TEXTURE_2D ,GL_TEXTURE1,GL_UNSIGNED_BYTE, true);
     shaderProgram.use();
     shaderProgram.setInt("texture1",0);
     shaderProgram.setInt("texture2",1);
@@ -83,7 +316,7 @@ void GetStart::containerWithAwesomeFaceTexture1()
         shaderProgram.use();
         vao.Bind();
 
-        glDrawElements(GL_TRIANGLES,6 ,GL_UNSIGNED_INT,0);
+        glDrawElements(GL_TRIANGLES,6 ,GL_UNSIGNED_INT,nullptr);
         glfwSwapBuffers(m_window);
         glfwPollEvents();
     }

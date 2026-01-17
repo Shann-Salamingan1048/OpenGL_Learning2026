@@ -19,7 +19,11 @@ int main()
     //gs.XOffset();
     //gs.outputVerPostoFrag();
     //gs.containerTexture1();
-    gs.containerWithAwesomeFaceTexture1();
+    //gs.containerWithAwesomeFaceTexture1();
+    //gs.containerWithAwesomeFaceTextureLookReverse();
+    //gs.containerWithAwesomeFaceTexture4Smiley();
+    //gs.containerWithAwesomeFaceTextureDisplayCenterPixel();
+    gs.containerWithAwesomeFaceTextureUniformMix3rdPara();
 
 
 

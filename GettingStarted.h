@@ -29,6 +29,10 @@ namespace GettingStarted
         void outputVerPostoFrag();
         void containerTexture1();
         void containerWithAwesomeFaceTexture1();
+        void containerWithAwesomeFaceTextureLookReverse();
+        void containerWithAwesomeFaceTexture4Smiley();
+        void containerWithAwesomeFaceTextureDisplayCenterPixel();
+        void containerWithAwesomeFaceTextureUniformMix3rdPara();
     private:
         GLFWwindow* m_window;
         static void framebuffer_size_callback(GLFWwindow* window, int width, int height) noexcept;
