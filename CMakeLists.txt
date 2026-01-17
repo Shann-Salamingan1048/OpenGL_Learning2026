@@ -15,8 +15,12 @@ set(SOURCE_FILES
         main.cpp
         core/src/glad.c
         GettingStarted.cpp
-        GettingStarted.h
         Shader.cpp
+        Texture.cpp
+        stb.cpp
+        vao.cpp
+        vbo.cpp
+        ebo.cpp
 )
 
 # 3. Create the Executable
@@ -24,7 +28,7 @@ add_executable(OpenGL_Learning2026 ${SOURCE_FILES})
 # 1. Make sure this is AFTER your add_executable(YourProjectName ...) line
 # Replace 'YourProjectName' with the actual name of your project executable
 # 1. Define the folder you want to copy
-set(ASSET_FOLDER "glsl")
+set(GLSL_FOLDER "glsl")
 
 # 2. The Command
 add_custom_command(
@@ -33,12 +37,24 @@ add_custom_command(
 
         # The actual copy command
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/${ASSET_FOLDER}      # FROM: Your project folder
-        $<TARGET_FILE_DIR:OpenGL_Learning2026>/${ASSET_FOLDER} # TO: Next to the .exe
+        ${CMAKE_CURRENT_SOURCE_DIR}/${GLSL_FOLDER}      # FROM: Your project folder
+        $<TARGET_FILE_DIR:OpenGL_Learning2026>/${GLSL_FOLDER} # TO: Next to the .exe
 
-        COMMENT "Copying ${ASSET_FOLDER} to binary directory..."
+        COMMENT "Copying ${GLSL_FOLDER} to binary directory..."
 )
+set(TEXTURES_FOLDER "pics")
 
+add_custom_command(
+        # TARGET must match the name in your add_executable(...) line!
+        TARGET OpenGL_Learning2026 POST_BUILD
+
+        # The actual copy command
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/${TEXTURES_FOLDER}      # FROM: Your project folder
+        $<TARGET_FILE_DIR:OpenGL_Learning2026>/${TEXTURES_FOLDER} # TO: Next to the .exe
+
+        COMMENT "Copying ${TEXTURES_FOLDER} to binary directory..."
+)
 # 4. Linking
 # Links your local glfw3.lib and the required Windows system libs
 target_link_libraries(OpenGL_Learning2026

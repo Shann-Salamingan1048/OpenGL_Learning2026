@@ -3,6 +3,7 @@
 //
 
 #include "GettingStarted.h"
+
 using namespace GettingStarted;
 // Force usage of high-performance GPU on Windows
 
@@ -38,6 +39,133 @@ void GetStart::framebuffer_size_callback(GLFWwindow* window, int width, int heig
 {
     glViewport(0, 0, width, height);
 }
+void GetStart::containerWithAwesomeFaceTexture1()
+{
+    printCurrentUseGPU();
+    GLfloat vertices[] = {
+        // positions          // colors           // texture coords
+        0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
+        0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
+       -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
+       -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left
+   };
+    GLuint indices[] =
+    {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
+
+    Shader shaderProgram("glsl/gettingStarted/containerWithAwesomeFaceTexture1.vert", "glsl/gettingStarted/containerWithAwesomeFaceTexture1.frag");
+    VAO vao;
+    vao.Bind();
+    VBO vbo(vertices, sizeof(vertices));
+    EBO ebo(indices, sizeof(indices));
+    vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+    vao.LinkAttrib(vbo, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    vao.LinkAttrib(vbo, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    vao.Unbind();
+    vbo.Unbind();
+    ebo.Unbind();
+
+    // Texture
+    std::string container = "pics/gettingstarted/container.jpg";
+    std::string awesomeFace = "pics/gettingstarted/awesomeface.png";
+    Texture text1(container.c_str(),GL_TEXTURE_2D ,GL_TEXTURE0,GL_UNSIGNED_BYTE, false);
+    Texture text2(awesomeFace.c_str(),GL_TEXTURE_2D ,GL_TEXTURE1,GL_UNSIGNED_BYTE, false);
+    shaderProgram.use();
+    shaderProgram.setInt("texture1",0);
+    shaderProgram.setInt("texture2",1);
+    while (!isWindowRunning())
+    {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        shaderProgram.use();
+        vao.Bind();
+
+        glDrawElements(GL_TRIANGLES,6 ,GL_UNSIGNED_INT,0);
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
+    }
+    vao.Delete();
+    vbo.Delete();
+    ebo.Delete();
+    shaderProgram.deleteShader();
+    text1.Delete();
+    text2.Delete();
+    glfwTerminate();
+}
+void GetStart::containerTexture1()
+{
+    printCurrentUseGPU();
+    GLfloat vertices[] = {
+        // positions          // colors           // texture coords
+        0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
+        0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
+       -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
+       -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left
+   };
+    GLuint indices[] =
+    {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
+
+    Shader shaderProgram("glsl/gettingStarted/container1.vert", "glsl/gettingStarted/container1.frag");
+    VAO vao;
+    vao.Bind();
+    VBO vbo(vertices, sizeof(vertices));
+    EBO ebo(indices, sizeof(indices));
+    vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+    vao.LinkAttrib(vbo, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    vao.LinkAttrib(vbo, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    vao.Unbind();
+    vbo.Unbind();
+    ebo.Unbind();
+
+    // Texture
+
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    int width, height, nrChannels;
+
+    std::string imagePath = "pics/gettingstarted/container.jpg";
+    unsigned char* data = stbi_load(imagePath.c_str(), &width, &height, &nrChannels,0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::println("Failed to load Texture!");
+    }
+    stbi_image_free(data);//free memory
+
+    while (!isWindowRunning())
+    {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glBindTexture(GL_TEXTURE_2D, texture);
+        shaderProgram.use();
+        vao.Bind();
+
+        glDrawElements(GL_TRIANGLES,6 ,GL_UNSIGNED_INT,0);
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
+    }
+    vao.Delete();
+    vbo.Delete();
+    ebo.Delete();
+    shaderProgram.deleteShader();
+    glfwTerminate();
+}
 void GetStart::outputVerPostoFrag()
 {
     printCurrentUseGPU();
@@ -50,20 +178,14 @@ void GetStart::outputVerPostoFrag()
    };
     // Much cleaner and less prone to errors
     Shader shaderProgram("glsl/gettingStarted/vertPosToFrag.vert", "glsl/gettingStarted/xOffset.frag");
+    VAO vao;
+    vao.Bind();
+    VBO vbo(vertices, sizeof(vertices));
+    vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 6 * sizeof(float), (void*)0);
+    vao.LinkAttrib(vbo, 1, 3, GL_FLOAT, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 
-    GLuint VBO, VAO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0 );
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)) );
-    glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    vao.Unbind();
+    vbo.Unbind();
 
     while (!isWindowRunning())
     {
@@ -72,13 +194,13 @@ void GetStart::outputVerPostoFrag()
 
 
         shaderProgram.use();
-        glBindVertexArray(VAO);
+        vao.Bind();
         glDrawArrays(GL_TRIANGLES, 0 ,3);
         glfwSwapBuffers(m_window);
         glfwPollEvents();
     }
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
+    vao.Delete();
+    vbo.Delete();
     shaderProgram.deleteShader();
     glfwTerminate();
 }
@@ -607,6 +729,7 @@ void GetStart::HelloTriangleExer1()
     glDeleteProgram(shaderProgram);
     glfwTerminate();
 }
+
 void GetStart::HelloSquare()
 {
     printCurrentUseGPU();

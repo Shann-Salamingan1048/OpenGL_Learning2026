@@ -17,7 +17,12 @@ int main()
     //gs.TriangleRainbow();
     //gs.UpSideDownTriangle();
     //gs.XOffset();
-    gs.outputVerPostoFrag();
+    //gs.outputVerPostoFrag();
+    //gs.containerTexture1();
+    gs.containerWithAwesomeFaceTexture1();
+
+
+
     //std::println("{}", _MSC_VER);
     return 0;
 }

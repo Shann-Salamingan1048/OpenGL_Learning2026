@@ -5,6 +5,11 @@
 #include <string_view>
 #include <string>
 #include "Shader.h"
+#include "vao.h"
+#include "vbo.h"
+#include "ebo.h"
+#include "Texture.h"
+#include <stb/stb_images.h>
 namespace GettingStarted
 {
     class GetStart
@@ -22,6 +27,8 @@ namespace GettingStarted
         void UpSideDownTriangle();
         void XOffset();
         void outputVerPostoFrag();
+        void containerTexture1();
+        void containerWithAwesomeFaceTexture1();
     private:
         GLFWwindow* m_window;
         static void framebuffer_size_callback(GLFWwindow* window, int width, int height) noexcept;
