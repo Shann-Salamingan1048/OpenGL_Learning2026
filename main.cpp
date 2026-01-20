@@ -23,7 +23,9 @@ int main()
     //gs.containerWithAwesomeFaceTextureLookReverse();
     //gs.containerWithAwesomeFaceTexture4Smiley();
     //gs.containerWithAwesomeFaceTextureDisplayCenterPixel();
-    gs.containerWithAwesomeFaceTextureUniformMix3rdPara();
+    //gs.containerWithAwesomeFaceTextureUniformMix3rdPara();
+    //gs.containerWithAwesomeFaceTextureRotating();
+    gs.containerWithAwesomeFaceTextureExchangeTranslateAndRotating();
 
 
 

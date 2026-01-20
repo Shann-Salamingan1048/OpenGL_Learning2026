@@ -39,6 +39,130 @@ void GetStart::framebuffer_size_callback(GLFWwindow* window, int width, int heig
 {
     glViewport(0, 0, width, height);
 }
+void GetStart::containerWithAwesomeFaceTextureExchangeTranslateAndRotating()
+{
+    printCurrentUseGPU();
+    GLfloat vertices[] = {
+        // positions                   // texture coords
+        0.5f,  0.5f, 0.0f,   1.0f, 1.0f, // top right
+        0.5f, -0.5f, 0.0f,   1.0f, 0.0f, // bottom right
+       -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, // bottom left
+       -0.5f,  0.5f, 0.0f,   0.0f, 1.0f  // top left
+   };
+    GLuint indices[] =
+    {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
+
+    Shader shaderProgram("glsl/gettingStarted/containerWithAwesomeFaceTextureExchangeTranslateAndRotating.vert", "glsl/gettingStarted/containerWithAwesomeFaceTextureExchangeTranslateAndRotating.frag");
+    VAO vao;
+    vao.Bind();
+    VBO vbo(vertices, sizeof(vertices));
+    EBO ebo(indices, sizeof(indices));
+    vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 5 * sizeof(float), (void*)0);
+    vao.LinkAttrib(vbo, 1, 2, GL_FLOAT, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    vao.Unbind();
+    vbo.Unbind();
+    ebo.Unbind();
+
+    // Texture
+    std::string container = "pics/gettingstarted/container.jpg";
+    std::string awesomeFace = "pics/gettingstarted/awesomeface.png";
+    Texture text1(container.c_str(),GL_TEXTURE_2D ,GL_TEXTURE0,GL_UNSIGNED_BYTE, true);
+    Texture text2(awesomeFace.c_str(),GL_TEXTURE_2D ,GL_TEXTURE1,GL_UNSIGNED_BYTE, true);
+    shaderProgram.use();
+    shaderProgram.setInt("texture1",0);
+    shaderProgram.setInt("texture2",1);
+
+
+    auto trans = glm::mat4(1.0f);
+    while (!isWindowRunning())
+    {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        trans = glm::rotate(trans, static_cast<float>(glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
+        trans = glm::translate(trans, glm::vec3(-0.5f, -0.5f, 0.0f));
+
+        shaderProgram.setMat4("transform", trans);
+        shaderProgram.use();
+        vao.Bind();
+
+        glDrawElements(GL_TRIANGLES,6 ,GL_UNSIGNED_INT,nullptr);
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
+        trans = glm::mat4(1.0f);
+    }
+    vao.Delete();
+    vbo.Delete();
+    ebo.Delete();
+    shaderProgram.deleteShader();
+    text1.Delete();
+    text2.Delete();
+    glfwTerminate();
+}
+void GetStart::containerWithAwesomeFaceTextureRotating()
+{
+    printCurrentUseGPU();
+    GLfloat vertices[] = {
+        // positions                   // texture coords
+        0.5f,  0.5f, 0.0f,   1.0f, 1.0f, // top right
+        0.5f, -0.5f, 0.0f,   1.0f, 0.0f, // bottom right
+       -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, // bottom left
+       -0.5f,  0.5f, 0.0f,   0.0f, 1.0f  // top left
+   };
+    GLuint indices[] =
+    {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
+
+    Shader shaderProgram("glsl/gettingStarted/containerWithAwesomeFaceTextureRotating.vert", "glsl/gettingStarted/containerWithAwesomeFaceTextureRotating.frag");
+    VAO vao;
+    vao.Bind();
+    VBO vbo(vertices, sizeof(vertices));
+    EBO ebo(indices, sizeof(indices));
+    vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 5 * sizeof(float), (void*)0);
+    vao.LinkAttrib(vbo, 1, 2, GL_FLOAT, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    vao.Unbind();
+    vbo.Unbind();
+    ebo.Unbind();
+
+    // Texture
+    std::string container = "pics/gettingstarted/container.jpg";
+    std::string awesomeFace = "pics/gettingstarted/awesomeface.png";
+    Texture text1(container.c_str(),GL_TEXTURE_2D ,GL_TEXTURE0,GL_UNSIGNED_BYTE, true);
+    Texture text2(awesomeFace.c_str(),GL_TEXTURE_2D ,GL_TEXTURE1,GL_UNSIGNED_BYTE, true);
+    shaderProgram.use();
+    shaderProgram.setInt("texture1",0);
+    shaderProgram.setInt("texture2",1);
+
+
+    auto trans = glm::mat4(1.0f);
+    while (!isWindowRunning())
+    {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+        trans = glm::rotate(trans, static_cast<float>(glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
+        shaderProgram.setMat4("transform", trans);
+        shaderProgram.use();
+        vao.Bind();
+
+        glDrawElements(GL_TRIANGLES,6 ,GL_UNSIGNED_INT,nullptr);
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
+        trans = glm::mat4(1.0f);
+    }
+    vao.Delete();
+    vbo.Delete();
+    ebo.Delete();
+    shaderProgram.deleteShader();
+    text1.Delete();
+    text2.Delete();
+    glfwTerminate();
+}
 void GetStart::containerWithAwesomeFaceTextureUniformMix3rdPara()
 {
     printCurrentUseGPU();

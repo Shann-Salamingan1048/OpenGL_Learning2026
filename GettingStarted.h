@@ -2,6 +2,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <print>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <string_view>
 #include <string>
 #include "Shader.h"
@@ -33,6 +36,8 @@ namespace GettingStarted
         void containerWithAwesomeFaceTexture4Smiley();
         void containerWithAwesomeFaceTextureDisplayCenterPixel();
         void containerWithAwesomeFaceTextureUniformMix3rdPara();
+        void containerWithAwesomeFaceTextureRotating();
+        void containerWithAwesomeFaceTextureExchangeTranslateAndRotating();
     private:
         GLFWwindow* m_window;
         static void framebuffer_size_callback(GLFWwindow* window, int width, int height) noexcept;
