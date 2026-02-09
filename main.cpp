@@ -25,7 +25,13 @@ int main()
     //gs.containerWithAwesomeFaceTextureDisplayCenterPixel();
     //gs.containerWithAwesomeFaceTextureUniformMix3rdPara();
     //gs.containerWithAwesomeFaceTextureRotating();
-    gs.containerWithAwesomeFaceTextureExchangeTranslateAndRotating();
+    //gs.containerWithAwesomeFaceTextureExchangeTranslateAndRotating();
+    //gs.DrawSecondContrainerViaTransformations();
+    //gs.going3d();
+    //gs.more3d();
+    //gs.moreCubes();
+    //gs.make3rdContainerRotate();
+    gs.tryCamera();
 
 
 

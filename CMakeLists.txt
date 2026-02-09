@@ -21,6 +21,8 @@ set(SOURCE_FILES
         vao.cpp
         vbo.cpp
         ebo.cpp
+        Camera.h
+        TimeUtils.h
 )
 
 # 3. Create the Executable

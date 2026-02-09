@@ -1,18 +1,11 @@
 #pragma once
-#include <glad/glad.h>
+
 #include <GLFW/glfw3.h>
 #include <print>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <string_view>
-#include <string>
-#include "Shader.h"
-#include "vao.h"
-#include "vbo.h"
-#include "ebo.h"
-#include "Texture.h"
-#include <stb/stb_images.h>
+#include "TimeUtils.h"
+#include "Camera.h"
+struct Camera;
+struct Time;
 namespace GettingStarted
 {
     class GetStart
@@ -38,11 +31,23 @@ namespace GettingStarted
         void containerWithAwesomeFaceTextureUniformMix3rdPara();
         void containerWithAwesomeFaceTextureRotating();
         void containerWithAwesomeFaceTextureExchangeTranslateAndRotating();
+        void DrawSecondContrainerViaTransformations();
+        void going3d();
+        void more3d();
+        void moreCubes();
+        void make3rdContainerRotate();
+        void tryCamera();
     private:
         GLFWwindow* m_window;
         static void framebuffer_size_callback(GLFWwindow* window, int width, int height) noexcept;
         bool isWindowRunning() const noexcept{ return glfwWindowShouldClose(m_window);};
         static void printCurrentUseGPU() noexcept;
-
+        void processInput(GLFWwindow *window);
+    private:
+        int m_width;
+        int m_height;
+    private:
+        Time time;
+        Camera camera;
     };
 };

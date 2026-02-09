@@ -1,12 +1,33 @@
 //
 // Created by USER on 1/11/2026.
 //
-
+#include <glad/glad.h>
 #include "GettingStarted.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <string>
+#include "Shader.h"
+#include "vao.h"
+#include "vbo.h"
+#include "ebo.h"
+#include "Texture.h"
+#include <stb/stb_images.h>
 
 using namespace GettingStarted;
 // Force usage of high-performance GPU on Windows
-
+void GetStart::processInput(GLFWwindow *window)
+{
+    camera.speed = static_cast<float>(2.5 * time.deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.pos += camera.speed * camera.front;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.pos -= camera.speed * camera.front;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.pos -= glm::normalize(glm::cross(camera.front, camera.up)) * camera.speed;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.pos += glm::normalize(glm::cross(camera.front, camera.up)) * camera.speed;
+}
 
 GetStart::GetStart(uint16_t width, uint16_t height, const char* title)
 {
@@ -29,6 +50,7 @@ GetStart::GetStart(uint16_t width, uint16_t height, const char* title)
     glfwMakeContextCurrent(m_window);
     glfwSwapInterval(1);
     glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
+    glfwGetFramebufferSize(m_window, &m_width, &m_height);
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
     {
         std::println("Failed to initialize GLAD");
@@ -38,6 +60,628 @@ GetStart::GetStart(uint16_t width, uint16_t height, const char* title)
 void GetStart::framebuffer_size_callback(GLFWwindow* window, int width, int height) noexcept
 {
     glViewport(0, 0, width, height);
+}
+void GetStart::tryCamera()
+{
+    // init Camera
+    camera.pos   = glm::vec3(0.0f, 0.0f,  3.0f);
+    camera.front = glm::vec3(0.0f, 0.0f, -1.0f);
+    camera.up    = glm::vec3(0.0f, 1.0f,  0.0f);
+    glEnable(GL_DEPTH_TEST);
+    printCurrentUseGPU();
+    GLfloat vertices[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    };
+    // world space positions of our cubes
+    glm::vec3 cubePositions[] = {
+        glm::vec3( 0.0f,  0.0f,  0.0f),
+        glm::vec3( 2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3( 2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3( 1.3f, -2.0f, -2.5f),
+        glm::vec3( 1.5f,  2.0f, -2.5f),
+        glm::vec3( 1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -5.5f),
+        glm::vec3(-0.3f,  1.0f, -15.5f),
+    };
+    Shader shaderProgram("glsl/gettingStarted/tryCamera.vert", "glsl/gettingStarted/tryCamera.frag");
+    VAO vao;
+    vao.Bind();
+    VBO vbo(vertices, sizeof(vertices));
+
+    vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 5 * sizeof(float), (void*)0);
+    vao.LinkAttrib(vbo, 1, 2, GL_FLOAT, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    vao.Unbind();
+    vbo.Unbind();
+
+    // Texture
+    std::string container = "pics/gettingstarted/container.jpg";
+    std::string awesomeFace = "pics/gettingstarted/awesomeface.png";
+    Texture text1(container.c_str(),GL_TEXTURE_2D ,GL_TEXTURE0,GL_UNSIGNED_BYTE, true);
+    Texture text2(awesomeFace.c_str(),GL_TEXTURE_2D ,GL_TEXTURE1,GL_UNSIGNED_BYTE, true);
+    shaderProgram.use();
+    shaderProgram.setInt("texture1",0);
+    shaderProgram.setInt("texture2",1);
+
+    auto projection = glm::perspective(glm::radians(45.0f), static_cast<float>(m_width) / static_cast<float>(m_height) , 0.01f, 100.0f);
+    shaderProgram.setMat4("projection", projection);
+    while (!isWindowRunning())
+    {
+        // Time
+        time.currentFrame = static_cast<float>(glfwGetTime());
+        time.deltaTime = time.currentFrame - time.lastFrame;
+        time.lastFrame = time.currentFrame;
+
+        processInput(m_window);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
+
+        shaderProgram.use();
+        // create transformations
+        camera.view = glm::lookAt(camera.pos, camera.pos + camera.front, camera.up);
+
+        shaderProgram.setMat4("view", camera.view);
+        // pass them to the shaders (3 different ways)
+        vao.Bind();
+        for (uint8_t i = 0; auto& cubePos : cubePositions)
+        {
+            auto model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePos);
+            float angle = 20.0f * i;
+            if (i % 3 == 0)
+                angle = glfwGetTime() * 25.0f;
+
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            shaderProgram.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES,0, 36);
+            ++i;
+        }
+
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
+
+    }
+    vao.Delete();
+    vbo.Delete();
+    shaderProgram.deleteShader();
+    text1.Delete();
+    text2.Delete();
+    glfwTerminate();
+}
+void GetStart::make3rdContainerRotate()
+{
+    glEnable(GL_DEPTH_TEST);
+    printCurrentUseGPU();
+    GLfloat vertices[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    };
+    // world space positions of our cubes
+    glm::vec3 cubePositions[] = {
+        glm::vec3( 0.0f,  0.0f,  0.0f),
+        glm::vec3( 2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3( 2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3( 1.3f, -2.0f, -2.5f),
+        glm::vec3( 1.5f,  2.0f, -2.5f),
+        glm::vec3( 1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -5.5f),
+        glm::vec3(-0.3f,  1.0f, -15.5f),
+    };
+    Shader shaderProgram("glsl/gettingStarted/make3rdContainerRotate.vert", "glsl/gettingStarted/make3rdContainerRotate.frag");
+    VAO vao;
+    vao.Bind();
+    VBO vbo(vertices, sizeof(vertices));
+
+    vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 5 * sizeof(float), (void*)0);
+    vao.LinkAttrib(vbo, 1, 2, GL_FLOAT, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    vao.Unbind();
+    vbo.Unbind();
+
+    // Texture
+    std::string container = "pics/gettingstarted/container.jpg";
+    std::string awesomeFace = "pics/gettingstarted/awesomeface.png";
+    Texture text1(container.c_str(),GL_TEXTURE_2D ,GL_TEXTURE0,GL_UNSIGNED_BYTE, true);
+    Texture text2(awesomeFace.c_str(),GL_TEXTURE_2D ,GL_TEXTURE1,GL_UNSIGNED_BYTE, true);
+    shaderProgram.use();
+    shaderProgram.setInt("texture1",0);
+    shaderProgram.setInt("texture2",1);
+
+
+
+    while (!isWindowRunning())
+    {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
+
+        shaderProgram.use();
+        // create transformations
+        auto view          = glm::mat4(1.0f);
+        auto projection    = glm::mat4(1.0f);
+        view  = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
+        projection = glm::perspective(glm::radians(45.0f), static_cast<float>(m_width) / static_cast<float>(m_height) , 0.01f, 100.0f);
+        // retrieve the matrix uniform locations
+        shaderProgram.setMat4("view", view);
+        shaderProgram.setMat4("projection", projection);
+        // pass them to the shaders (3 different ways)
+        vao.Bind();
+        for (uint8_t i = 0; auto& cubePos : cubePositions)
+        {
+            auto model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePos);
+            float angle = 20.0f * i;
+            if (i % 3 == 0)
+                angle = glfwGetTime() * 25.0f;
+
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            shaderProgram.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES,0, 36);
+            ++i;
+        }
+
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
+
+    }
+    vao.Delete();
+    vbo.Delete();
+    shaderProgram.deleteShader();
+    text1.Delete();
+    text2.Delete();
+    glfwTerminate();
+}
+void GetStart::moreCubes()
+{
+    glEnable(GL_DEPTH_TEST);
+    printCurrentUseGPU();
+    GLfloat vertices[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    };
+    // world space positions of our cubes
+    glm::vec3 cubePositions[] = {
+        glm::vec3( 0.0f,  0.0f,  0.0f),
+        glm::vec3( 2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3( 2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3( 1.3f, -2.0f, -2.5f),
+        glm::vec3( 1.5f,  2.0f, -2.5f),
+        glm::vec3( 1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+    Shader shaderProgram("glsl/gettingStarted/moreCubes.vert", "glsl/gettingStarted/moreCubes.frag");
+    VAO vao;
+    vao.Bind();
+    VBO vbo(vertices, sizeof(vertices));
+
+    vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 5 * sizeof(float), (void*)0);
+    vao.LinkAttrib(vbo, 1, 2, GL_FLOAT, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    vao.Unbind();
+    vbo.Unbind();
+
+    // Texture
+    std::string container = "pics/gettingstarted/container.jpg";
+    std::string awesomeFace = "pics/gettingstarted/awesomeface.png";
+    Texture text1(container.c_str(),GL_TEXTURE_2D ,GL_TEXTURE0,GL_UNSIGNED_BYTE, true);
+    Texture text2(awesomeFace.c_str(),GL_TEXTURE_2D ,GL_TEXTURE1,GL_UNSIGNED_BYTE, true);
+    shaderProgram.use();
+    shaderProgram.setInt("texture1",0);
+    shaderProgram.setInt("texture2",1);
+
+
+
+    while (!isWindowRunning())
+    {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
+
+        shaderProgram.use();
+        // create transformations
+        auto view          = glm::mat4(1.0f);
+        auto projection    = glm::mat4(1.0f);
+        view  = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        projection = glm::perspective(glm::radians(45.0f), (float)800 / (float)800, 0.1f, 100.0f);
+        // retrieve the matrix uniform locations
+        shaderProgram.setMat4("view", view);
+        shaderProgram.setMat4("projection", projection);
+        // pass them to the shaders (3 different ways)
+        vao.Bind();
+        for (uint8_t i = 0; auto& cubePos : cubePositions)
+        {
+            auto model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePos);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
+            shaderProgram.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES,0, 36);
+            ++i;
+        }
+
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
+
+    }
+    vao.Delete();
+    vbo.Delete();
+    shaderProgram.deleteShader();
+    text1.Delete();
+    text2.Delete();
+    glfwTerminate();
+}
+void GetStart::more3d()
+{
+    glEnable(GL_DEPTH_TEST);
+    printCurrentUseGPU();
+    GLfloat vertices[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    };
+
+    Shader shaderProgram("glsl/gettingStarted/more3d.vert", "glsl/gettingStarted/more3d.frag");
+    VAO vao;
+    vao.Bind();
+    VBO vbo(vertices, sizeof(vertices));
+
+    vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 5 * sizeof(float), (void*)0);
+    vao.LinkAttrib(vbo, 1, 2, GL_FLOAT, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    vao.Unbind();
+    vbo.Unbind();
+
+    // Texture
+    std::string container = "pics/gettingstarted/container.jpg";
+    std::string awesomeFace = "pics/gettingstarted/awesomeface.png";
+    Texture text1(container.c_str(),GL_TEXTURE_2D ,GL_TEXTURE0,GL_UNSIGNED_BYTE, true);
+    Texture text2(awesomeFace.c_str(),GL_TEXTURE_2D ,GL_TEXTURE1,GL_UNSIGNED_BYTE, true);
+    shaderProgram.use();
+    shaderProgram.setInt("texture1",0);
+    shaderProgram.setInt("texture2",1);
+
+
+
+    while (!isWindowRunning())
+    {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
+
+        shaderProgram.use();
+        // create transformations
+        glm::mat4 model         = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+        glm::mat4 view          = glm::mat4(1.0f);
+        glm::mat4 projection    = glm::mat4(1.0f);
+        model = glm::rotate(model, static_cast<float>(glfwGetTime()), glm::vec3(1.0f, 0.0f, 0.0f));
+        view  = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        projection = glm::perspective(glm::radians(45.0f), (float)800 / (float)800, 0.1f, 100.0f);
+        // retrieve the matrix uniform locations
+        shaderProgram.setMat4("model", model);
+        shaderProgram.setMat4("view", view);
+        shaderProgram.setMat4("projection", projection);
+        // pass them to the shaders (3 different ways)
+        vao.Bind();
+        glDrawArrays(GL_TRIANGLES,0, 36);
+
+
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
+
+    }
+    vao.Delete();
+    vbo.Delete();
+    shaderProgram.deleteShader();
+    text1.Delete();
+    text2.Delete();
+    glfwTerminate();
+}
+void GetStart::going3d()
+{
+    printCurrentUseGPU();
+    GLfloat vertices[] = {
+        // positions                   // texture coords
+        0.5f,  0.5f, 0.0f,   1.0f, 1.0f, // top right
+        0.5f, -0.5f, 0.0f,   1.0f, 0.0f, // bottom right
+       -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, // bottom left
+       -0.5f,  0.5f, 0.0f,   0.0f, 1.0f  // top left
+   };
+    GLuint indices[] =
+    {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
+
+    Shader shaderProgram("glsl/gettingStarted/going3d.vert", "glsl/gettingStarted/going3d.frag");
+    VAO vao;
+    vao.Bind();
+    VBO vbo(vertices, sizeof(vertices));
+    EBO ebo(indices, sizeof(indices));
+    vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 5 * sizeof(float), (void*)0);
+    vao.LinkAttrib(vbo, 1, 2, GL_FLOAT, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    vao.Unbind();
+    vbo.Unbind();
+    ebo.Unbind();
+
+    // Texture
+    std::string container = "pics/gettingstarted/container.jpg";
+    std::string awesomeFace = "pics/gettingstarted/awesomeface.png";
+    Texture text1(container.c_str(),GL_TEXTURE_2D ,GL_TEXTURE0,GL_UNSIGNED_BYTE, true);
+    Texture text2(awesomeFace.c_str(),GL_TEXTURE_2D ,GL_TEXTURE1,GL_UNSIGNED_BYTE, true);
+    shaderProgram.use();
+    shaderProgram.setInt("texture1",0);
+    shaderProgram.setInt("texture2",1);
+
+
+
+    while (!isWindowRunning())
+    {
+        auto trans = glm::mat4(1.0f);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+        trans = glm::rotate(trans, static_cast<float>(glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
+
+
+        shaderProgram.use();
+        // create transformations
+        glm::mat4 model         = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+        glm::mat4 view          = glm::mat4(1.0f);
+        glm::mat4 projection    = glm::mat4(1.0f);
+        model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        view  = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        projection = glm::perspective(glm::radians(45.0f), (float)800 / (float)800, 0.1f, 100.0f);
+        // retrieve the matrix uniform locations
+        shaderProgram.setMat4("model", model);
+        shaderProgram.setMat4("view", view);
+        shaderProgram.setMat4("projection", projection);
+        // pass them to the shaders (3 different ways)
+        vao.Bind();
+        glDrawElements(GL_TRIANGLES,6 ,GL_UNSIGNED_INT,nullptr);
+
+
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
+
+    }
+    vao.Delete();
+    vbo.Delete();
+    ebo.Delete();
+    shaderProgram.deleteShader();
+    text1.Delete();
+    text2.Delete();
+    glfwTerminate();
+}
+void GetStart::DrawSecondContrainerViaTransformations()
+{
+    printCurrentUseGPU();
+    GLfloat vertices[] = {
+        // positions                   // texture coords
+        0.5f,  0.5f, 0.0f,   1.0f, 1.0f, // top right
+        0.5f, -0.5f, 0.0f,   1.0f, 0.0f, // bottom right
+       -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, // bottom left
+       -0.5f,  0.5f, 0.0f,   0.0f, 1.0f  // top left
+   };
+    GLuint indices[] =
+    {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
+
+    Shader shaderProgram("glsl/gettingStarted/DrawSecondContrainerViaTransformations.vert", "glsl/gettingStarted/DrawSecondContrainerViaTransformations.frag");
+    VAO vao;
+    vao.Bind();
+    VBO vbo(vertices, sizeof(vertices));
+    EBO ebo(indices, sizeof(indices));
+    vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 5 * sizeof(float), (void*)0);
+    vao.LinkAttrib(vbo, 1, 2, GL_FLOAT, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    vao.Unbind();
+    vbo.Unbind();
+    ebo.Unbind();
+
+    // Texture
+    std::string container = "pics/gettingstarted/container.jpg";
+    std::string awesomeFace = "pics/gettingstarted/awesomeface.png";
+    Texture text1(container.c_str(),GL_TEXTURE_2D ,GL_TEXTURE0,GL_UNSIGNED_BYTE, true);
+    Texture text2(awesomeFace.c_str(),GL_TEXTURE_2D ,GL_TEXTURE1,GL_UNSIGNED_BYTE, true);
+    shaderProgram.use();
+    shaderProgram.setInt("texture1",0);
+    shaderProgram.setInt("texture2",1);
+
+
+
+    while (!isWindowRunning())
+    {
+        auto trans = glm::mat4(1.0f);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+        trans = glm::rotate(trans, static_cast<float>(glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
+
+        shaderProgram.setMat4("transform", trans);
+        shaderProgram.use();
+        vao.Bind();
+        glDrawElements(GL_TRIANGLES,6 ,GL_UNSIGNED_INT,nullptr);
+
+        trans = glm::mat4(1.0f);
+        trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
+        float scale = static_cast<float>(sin(glfwGetTime()));
+        trans = glm::scale(trans, {scale, scale, scale} );
+        shaderProgram.setMat4("transform", trans);
+        shaderProgram.use();
+        vao.Bind();
+        glDrawElements(GL_TRIANGLES,6 ,GL_UNSIGNED_INT,nullptr);
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
+
+    }
+    vao.Delete();
+    vbo.Delete();
+    ebo.Delete();
+    shaderProgram.deleteShader();
+    text1.Delete();
+    text2.Delete();
+    glfwTerminate();
 }
 void GetStart::containerWithAwesomeFaceTextureExchangeTranslateAndRotating()
 {

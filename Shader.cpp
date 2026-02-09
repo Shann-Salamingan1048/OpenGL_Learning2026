@@ -1,5 +1,5 @@
 ﻿#include "Shader.h"
-
+#include <fstream>
 Shader::Shader(const char* vertPath, const char* fragPath) : m_ID{0}
 {
 	try
