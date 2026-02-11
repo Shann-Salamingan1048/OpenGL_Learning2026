@@ -36,18 +36,24 @@ namespace GettingStarted
         void more3d();
         void moreCubes();
         void make3rdContainerRotate();
+        void walkAround();
         void tryCamera();
+        void tryMouse();
+
     private:
         GLFWwindow* m_window;
         static void framebuffer_size_callback(GLFWwindow* window, int width, int height) noexcept;
         bool isWindowRunning() const noexcept{ return glfwWindowShouldClose(m_window);};
         static void printCurrentUseGPU() noexcept;
         void processInput(GLFWwindow *window);
+        static void mouse_callBack(GLFWwindow* window, double xpos, double ypos);
+
+    private:
+        Time time;
+        CameraUtils::Camera camera{glm::vec3(0.0f, 0.0f, 3.0f)};
+
     private:
         int m_width;
         int m_height;
-    private:
-        Time time;
-        Camera camera;
     };
 };

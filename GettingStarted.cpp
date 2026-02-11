@@ -18,17 +18,42 @@ using namespace GettingStarted;
 // Force usage of high-performance GPU on Windows
 void GetStart::processInput(GLFWwindow *window)
 {
-    camera.speed = static_cast<float>(2.5 * time.deltaTime);
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.pos += camera.speed * camera.front;
+        camera.ProcessKeyboard(CameraUtils::Camera_Movement::FORWARD, time.deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.pos -= camera.speed * camera.front;
+        camera.ProcessKeyboard(CameraUtils::Camera_Movement::BACKWARD, time.deltaTime);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.pos -= glm::normalize(glm::cross(camera.front, camera.up)) * camera.speed;
+        camera.ProcessKeyboard(CameraUtils::Camera_Movement::LEFT, time.deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.pos += glm::normalize(glm::cross(camera.front, camera.up)) * camera.speed;
+        camera.ProcessKeyboard(CameraUtils::Camera_Movement::RIGHT, time.deltaTime);
 }
+void GetStart::mouse_callBack(GLFWwindow* window, double xposIn, double yposIn)
+{
+    // 1. Retrieve the "GetStart" instance from the window
+    GetStart* app = static_cast<GetStart*>(glfwGetWindowUserPointer(window));
 
+    // Safety check: ensure the pointer isn't null
+    if (!app) return;
+
+    // 2. Now use 'app->' to access your member variables
+    float xpos = static_cast<float>(xposIn);
+    float ypos = static_cast<float>(yposIn);
+
+    if (app->camera.firstMouse) // Access via app->
+    {
+        app->camera.lastX = xpos;
+        app->camera.lastY = ypos;
+        app->camera.firstMouse = false;
+    }
+
+    float xoffset = xpos - app->camera.lastX; // Access via app->
+    float yoffset = app->camera.lastY - ypos; // Access via app->
+
+    app->camera.lastX = xpos;
+    app->camera.lastY = ypos;
+
+    app->camera.ProcessMouseMovement(xoffset, yoffset);
+}
 GetStart::GetStart(uint16_t width, uint16_t height, const char* title)
 {
     if (!glfwInit())
@@ -51,22 +76,148 @@ GetStart::GetStart(uint16_t width, uint16_t height, const char* title)
     glfwSwapInterval(1);
     glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
     glfwGetFramebufferSize(m_window, &m_width, &m_height);
+    glfwSetWindowUserPointer(m_window, this);
+    glfwSetCursorPosCallback(m_window, mouse_callBack);
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
     {
         std::println("Failed to initialize GLAD");
         return;
     }
+
+
+    camera.lastX = static_cast<float>(width/2.0f);
+    camera.lastY = static_cast<float>(height/2.0f);
+
 }
 void GetStart::framebuffer_size_callback(GLFWwindow* window, int width, int height) noexcept
 {
     glViewport(0, 0, width, height);
 }
+void GetStart::tryMouse()
+{
+    glEnable(GL_DEPTH_TEST);
+    printCurrentUseGPU();
+    GLfloat vertices[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    };
+    // world space positions of our cubes
+    glm::vec3 cubePositions[] = {
+        glm::vec3( 0.0f,  0.0f,  0.0f),
+        glm::vec3( 2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3( 2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3( 1.3f, -2.0f, -2.5f),
+        glm::vec3( 1.5f,  2.0f, -2.5f),
+        glm::vec3( 1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -5.5f),
+        glm::vec3(-0.3f,  1.0f, -15.5f),
+    };
+    Shader shaderProgram("glsl/gettingStarted/tryMouse.vert", "glsl/gettingStarted/tryMouse.frag");
+    VAO vao;
+    vao.Bind();
+    VBO vbo(vertices, sizeof(vertices));
+
+    vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 5 * sizeof(float), (void*)0);
+    vao.LinkAttrib(vbo, 1, 2, GL_FLOAT, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    vao.Unbind();
+    vbo.Unbind();
+
+    // Texture
+    std::string container = "pics/gettingstarted/container.jpg";
+    std::string awesomeFace = "pics/gettingstarted/awesomeface.png";
+    Texture text1(container.c_str(),GL_TEXTURE_2D ,GL_TEXTURE0,GL_UNSIGNED_BYTE, true);
+    Texture text2(awesomeFace.c_str(),GL_TEXTURE_2D ,GL_TEXTURE1,GL_UNSIGNED_BYTE, true);
+    shaderProgram.use();
+    shaderProgram.setInt("texture1",0);
+    shaderProgram.setInt("texture2",1);
+
+    auto projection = glm::perspective(glm::radians(45.0f), static_cast<float>(m_width) / static_cast<float>(m_height) , 0.01f, 100.0f);
+    shaderProgram.setMat4("projection", projection);
+    while (!isWindowRunning())
+    {
+        // Time
+        time.currentFrame = static_cast<float>(glfwGetTime());
+        time.deltaTime = time.currentFrame - time.lastFrame;
+        time.lastFrame = time.currentFrame;
+
+        processInput(m_window);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
+
+        shaderProgram.use();
+        // create transformations
+        auto view = camera.GetViewMatrix();
+
+        shaderProgram.setMat4("view", view);
+        // pass them to the shaders (3 different ways)
+        vao.Bind();
+        for (uint8_t i = 1; auto& cubePos : cubePositions)
+        {
+            auto model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePos);
+            float angle = glfwGetTime() * 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            shaderProgram.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES,0, 36);
+            ++i;
+        }
+
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
+
+    }
+    vao.Delete();
+    vbo.Delete();
+    shaderProgram.deleteShader();
+    text1.Delete();
+    text2.Delete();
+    glfwTerminate();
+}
 void GetStart::tryCamera()
 {
-    // init Camera
-    camera.pos   = glm::vec3(0.0f, 0.0f,  3.0f);
-    camera.front = glm::vec3(0.0f, 0.0f, -1.0f);
-    camera.up    = glm::vec3(0.0f, 1.0f,  0.0f);
     glEnable(GL_DEPTH_TEST);
     printCurrentUseGPU();
     GLfloat vertices[] = {
@@ -161,9 +312,9 @@ void GetStart::tryCamera()
 
         shaderProgram.use();
         // create transformations
-        camera.view = glm::lookAt(camera.pos, camera.pos + camera.front, camera.up);
+        auto view = camera.GetViewMatrix();
 
-        shaderProgram.setMat4("view", camera.view);
+        shaderProgram.setMat4("view", view);
         // pass them to the shaders (3 different ways)
         vao.Bind();
         for (uint8_t i = 0; auto& cubePos : cubePositions)
@@ -174,6 +325,133 @@ void GetStart::tryCamera()
             if (i % 3 == 0)
                 angle = glfwGetTime() * 25.0f;
 
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            shaderProgram.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES,0, 36);
+            ++i;
+        }
+
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
+
+    }
+    vao.Delete();
+    vbo.Delete();
+    shaderProgram.deleteShader();
+    text1.Delete();
+    text2.Delete();
+    glfwTerminate();
+}
+void GetStart::walkAround()
+{
+    glEnable(GL_DEPTH_TEST);
+    printCurrentUseGPU();
+    GLfloat vertices[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    };
+    // world space positions of our cubes
+    glm::vec3 cubePositions[] = {
+        glm::vec3( 0.0f,  0.0f,  0.0f),
+        glm::vec3( 2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3( 2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3( 1.3f, -2.0f, -2.5f),
+        glm::vec3( 1.5f,  2.0f, -2.5f),
+        glm::vec3( 1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -5.5f),
+        glm::vec3(-0.3f,  1.0f, -15.5f),
+    };
+    Shader shaderProgram("glsl/gettingStarted/walkAround.vert", "glsl/gettingStarted/walkAround.frag");
+    VAO vao;
+    vao.Bind();
+    VBO vbo(vertices, sizeof(vertices));
+
+    vao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 5 * sizeof(float), (void*)0);
+    vao.LinkAttrib(vbo, 1, 2, GL_FLOAT, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    vao.Unbind();
+    vbo.Unbind();
+
+    // Texture
+    std::string container = "pics/gettingstarted/container.jpg";
+    std::string awesomeFace = "pics/gettingstarted/awesomeface.png";
+    Texture text1(container.c_str(),GL_TEXTURE_2D ,GL_TEXTURE0,GL_UNSIGNED_BYTE, true);
+    Texture text2(awesomeFace.c_str(),GL_TEXTURE_2D ,GL_TEXTURE1,GL_UNSIGNED_BYTE, true);
+    shaderProgram.use();
+    shaderProgram.setInt("texture1",0);
+    shaderProgram.setInt("texture2",1);
+
+
+
+    while (!isWindowRunning())
+    {
+        time.currentFrame = static_cast<float>(glfwGetTime());
+        time.deltaTime = time.currentFrame - time.lastFrame;
+        time.lastFrame = time.currentFrame;
+        processInput(m_window);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
+
+        shaderProgram.use();
+        // create transformations
+        auto projection    = glm::mat4(1.0f);
+        const float radius = 10.0f;
+        float camX = sin(glfwGetTime()) * radius;
+        float camZ = cos(glfwGetTime()) * radius;
+        auto view  = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0,0.0,0.0), glm::vec3(0.0,1.0,0.0));
+        projection = glm::perspective(glm::radians(45.0f), static_cast<float>(m_width) / static_cast<float>(m_height) , 0.01f, 100.0f);
+        // retrieve the matrix uniform locations
+        shaderProgram.setMat4("view", view);
+        shaderProgram.setMat4("projection", projection);
+        // pass them to the shaders (3 different ways)
+        vao.Bind();
+        for (uint8_t i = 0; auto& cubePos : cubePositions)
+        {
+            auto model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePos);
+            float angle = 20.0f * i;
             model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
             shaderProgram.setMat4("model", model);
             glDrawArrays(GL_TRIANGLES,0, 36);

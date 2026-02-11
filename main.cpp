@@ -7,7 +7,7 @@ extern "C"
 }
 int main()
 {
-    GettingStarted::GetStart gs(800,800, "Getting Started");
+    GettingStarted::GetStart gs(1200,1200, "Getting Started");
     //gs.HelloTriangle();
     //gs.HelloSquare();
     //gs.HelloTriangleExer1();
@@ -31,7 +31,9 @@ int main()
     //gs.more3d();
     //gs.moreCubes();
     //gs.make3rdContainerRotate();
-    gs.tryCamera();
+    //gs.tryCamera();
+    //gs.walkAround();
+    gs.tryMouse();
 
 
 

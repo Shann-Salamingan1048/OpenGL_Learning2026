@@ -23,6 +23,7 @@ set(SOURCE_FILES
         ebo.cpp
         Camera.h
         TimeUtils.h
+        Camera.cpp
 )
 
 # 3. Create the Executable
