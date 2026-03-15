@@ -48,6 +48,8 @@ int main()
 #ifdef __linux__
     ensure_high_performance_gpu();
 #endif
+
     Lighting::Lightings lighting(1200,1200, "Lighting");
+    lighting.tryLightCube();
     return 0;
 }

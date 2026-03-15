@@ -17,6 +17,116 @@ import EBO;
 import Texture;
 
 using namespace Lighting;
+
+void Lightings::tryLightCube()
+{
+    glEnable(GL_DEPTH_TEST);
+    printCurrentUseGPU();
+    GLfloat vertices[] = {
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+
+        -0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
+
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f, -0.5f,
+
+        -0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,
+    };
+
+    Shader lightingShader("glsl/lighting/1.color.vert", "glsl/lighting/1.color.frag");
+    Shader lightCubeShader("glsl/lighting/1.light_cube.vert", "glsl/lighting/1.light_cube.frag");
+    VAO CubeVao;
+    VBO vbo(vertices, sizeof(vertices));
+
+    CubeVao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 3 * sizeof(float), (void*)0);
+
+    VAO lightCubeVao;
+    lightCubeVao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 3 * sizeof(float), (void*)0);
+    glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+    while (!isWindowRunning())
+    {
+        // Time
+        time.currentFrame = static_cast<float>(glfwGetTime());
+        time.deltaTime = time.currentFrame - time.lastFrame;
+        time.lastFrame = time.currentFrame;
+
+        processInput(m_window);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
+
+        lightingShader.use();
+        lightingShader.setVec3("objectColor", 1.0f,0.5f,0.31f);
+        lightingShader.setVec3("lightColor", 1.0f,1.0f,1.0f);
+        // create transformations
+
+        // view/projection transformations
+        auto projection = glm::perspective(glm::radians(45.0f), static_cast<float>(m_width) / static_cast<float>(m_height) , 0.01f, 100.0f);
+        auto view = camera.GetViewMatrix();
+        lightingShader.setMat4("projection", projection);
+        lightingShader.setMat4("view", view);
+
+        auto model = glm::mat4(1.0f);
+        lightingShader.setMat4("model", model);
+        // pass them to the shaders (3 different ways)
+        CubeVao.Bind();
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        lightCubeShader.use();
+        lightCubeShader.setMat4("projection", projection);
+        lightCubeShader.setMat4("view", view);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, lightPos);
+        model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
+        lightCubeShader.setMat4("model", model);
+
+        lightCubeVao.Bind();
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
+
+    }
+    CubeVao.Delete();
+    lightCubeVao.Delete();
+    vbo.Delete();
+    lightCubeShader.deleteShader();
+    lightingShader.deleteShader();
+    glfwTerminate();
+}
+
 Lightings::Lightings(uint16_t width, uint16_t height, const char* title)
 {
     if (!glfwInit())

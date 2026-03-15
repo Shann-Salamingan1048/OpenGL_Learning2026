@@ -38,6 +38,7 @@ target_sources(OpenGL_Learning2026
         vao.cpp
         vbo.cpp
         ebo.cpp
+        Lighting.cpp
 
 )
 target_include_directories(OpenGL_Learning2026 PRIVATE ${CMAKE_SOURCE_DIR}/core/include)
