@@ -1,12 +1,14 @@
-#pragma once
-
+module;
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 #include <print>
-#include "TimeUtils.h"
-#include "Camera.h"
-struct Camera;
-struct Time;
-namespace GettingStarted
+
+export module GettingStarted;
+import Camera;
+import Time;
+
+export namespace GettingStarted
 {
     class GetStart
     {
@@ -49,7 +51,7 @@ namespace GettingStarted
         static void mouse_callBack(GLFWwindow* window, double xpos, double ypos);
 
     private:
-        Time time;
+        ShannUtilities::Time time;
         CameraUtils::Camera camera{glm::vec3(0.0f, 0.0f, 3.0f)};
 
     private:
@@ -57,3 +59,30 @@ namespace GettingStarted
         int m_height;
     };
 };
+//GettingStarted::GetStart gs(1200,1200, "Getting Started");
+//gs.HelloTriangle();
+//gs.HelloSquare();
+//gs.HelloTriangleExer1();
+//gs.HelloTriangleExer2();
+//gs.HelloTriangleExer3();
+//gs.TriangleChangingColor();
+//gs.TriangleRainbow();
+//gs.UpSideDownTriangle();
+//gs.XOffset();
+//gs.outputVerPostoFrag();
+//gs.containerTexture1();
+//gs.containerWithAwesomeFaceTexture1();
+//gs.containerWithAwesomeFaceTextureLookReverse();
+//gs.containerWithAwesomeFaceTexture4Smiley();
+//gs.containerWithAwesomeFaceTextureDisplayCenterPixel();
+//gs.containerWithAwesomeFaceTextureUniformMix3rdPara();
+//gs.containerWithAwesomeFaceTextureRotating();
+//gs.containerWithAwesomeFaceTextureExchangeTranslateAndRotating();
+//gs.DrawSecondContrainerViaTransformations();
+//gs.going3d();
+//gs.more3d();
+//gs.moreCubes();
+//gs.make3rdContainerRotate();
+//gs.tryCamera();
+//gs.walkAround();
+//gs.tryMouse();

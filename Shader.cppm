@@ -1,10 +1,14 @@
-#pragma once
+module;
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <string>
-#include <print>
 #include <unordered_map>
-class Shader
+export module Shader;
+export inline std::string readShaderFile(const char* filePath);
+export inline GLuint createShaderProgram(GLuint vertShader, GLuint fragShader);
+export inline GLuint compileShader(const char* source, GLenum type, const char* typeName);
+
+export class Shader
 {
 public:
 
@@ -32,14 +36,11 @@ public:
 	void setMat2(const std::string& name, const glm::mat2& mat) const;
 	void setMat3(const std::string& name, const glm::mat3& mat) const;
 	void setMat4(const std::string& name, const glm::mat4& mat) const;
-private:
-	GLuint m_ID;
 
 private:
 	mutable std::unordered_map<std::string, GLint> m_uniformCache;
-	GLint getUniformLocation(const std::string& name) const noexcept;
+	GLint getUniformLocation(const std::string& name) const;
+
 private:
-	static std::string readShaderFile(const char* filePath);
-	static GLuint createShaderProgram(GLuint vertShader, GLuint fragShader);
-	static GLuint compileShader(const char* source, GLenum type, const char* typeName);
+	GLuint m_ID;
 };

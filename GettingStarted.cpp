@@ -1,23 +1,28 @@
 //
 // Created by USER on 1/11/2026.
 //
+module;
 #include <glad/glad.h>
-#include "GettingStarted.h"
+#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <string>
-#include "Shader.h"
-#include "vao.h"
-#include "vbo.h"
-#include "ebo.h"
-#include "Texture.h"
-#include <stb/stb_images.h>
 
+#include <print>
+#include <stb/stb_images.h>
+module GettingStarted;
+import Shader;
+import VAO;
+import VBO;
+import EBO;
+import Texture;
 using namespace GettingStarted;
 // Force usage of high-performance GPU on Windows
 void GetStart::processInput(GLFWwindow *window)
 {
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camera.ProcessKeyboard(CameraUtils::Camera_Movement::FORWARD, time.deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)

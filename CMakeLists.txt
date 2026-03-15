@@ -1,33 +1,46 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.28)
 project(OpenGL_Learning2026 C CXX)
 
 # --- 1. C++23 CONFIGURATION ---
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
+# Force GCC to enable module support
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    add_compile_options(-fmodules-ts)
+endif()
 # --- 2. INCLUDE DIRECTORIES ---
-# This ensures both Linux and Windows can find your GLAD and header files
-include_directories(${CMAKE_SOURCE_DIR}/core/include)
-
-# --- 3. SOURCE FILES ---
 set(SOURCE_FILES
         main.cpp
         core/src/glad.c
-        GettingStarted.cpp
-        Shader.cpp
-        Texture.cpp
         stb.cpp
+)
+# --- 4. CREATE EXECUTABLE ---
+add_executable(OpenGL_Learning2026 ${SOURCE_FILES})
+# --- 5. ATTACH C++ MODULES ---
+target_sources(OpenGL_Learning2026
+        PUBLIC
+        FILE_SET CXX_MODULES FILES
+        GettingStarted.cppm
+        Texture.cppm
+        Camera.cppm
+        Shader.cppm
+        vao.cppm
+        vbo.cppm
+        ebo.cppm
+        TimeUtils.cppm
+        Lighting.cppm
+
+        PRIVATE
+        GettingStarted.cpp
+        Texture.cpp
+        Camera.cpp
+        Shader.cpp
         vao.cpp
         vbo.cpp
         ebo.cpp
-        Camera.cpp
-        Camera.h
-        TimeUtils.h
+
 )
-
-# --- 4. CREATE EXECUTABLE ---
-add_executable(OpenGL_Learning2026 ${SOURCE_FILES})
-
+target_include_directories(OpenGL_Learning2026 PRIVATE ${CMAKE_SOURCE_DIR}/core/include)
 # --- 5. ASSET COPYING (Shaders & Textures) ---
 # This handles copying your folders to the build directory so the app can find them
 set(ASSET_FOLDERS "glsl" "pics")

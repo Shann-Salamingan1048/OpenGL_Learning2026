@@ -1,6 +1,8 @@
-﻿#include "Texture.h"
+﻿module;
+#include <glad/glad.h>
 #include <stb/stb_images.h>
 #include <print>
+module Texture;
 Texture::Texture(const char* image, GLenum texType, GLenum slot, GLenum pixelType, bool verticalEnable)
 {
 	type = texType;
