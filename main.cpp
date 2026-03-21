@@ -46,10 +46,14 @@ void ensure_high_performance_gpu()
 int main()
 {
 #ifdef __linux__
-    ensure_high_performance_gpu();
+        ensure_high_performance_gpu();
 #endif
-
-    Lighting::Lightings lighting(1200,1200, "Lighting");
-    lighting.tryLightCube();
-    return 0;
+        Lighting::Lightings lighting(1200,1200, "Lighting");
+        //lighting.tryLightCube();
+        //lighting.tryAmbientDiffuse();
+        //lighting.tryPhong();
+        //lighting.tryPhongMove();
+        //lighting.tryPhongMoveShadingInViewSpace();
+        lighting.tryGouraud();
+        return 0;
 }

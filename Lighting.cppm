@@ -17,6 +17,11 @@ export namespace Lighting
         ~Lightings() = default;
     public:
         void tryLightCube();
+        void tryAmbientDiffuse();
+        void tryPhong();
+        void tryPhongMove();
+        void tryPhongMoveShadingInViewSpace();
+        void tryGouraud();
     private:
         GLFWwindow* m_window;
         static void framebuffer_size_callback(GLFWwindow* window, int width, int height) noexcept;

@@ -1,25 +1,24 @@
 cmake_minimum_required(VERSION 3.28)
-project(OpenGL_Learning2026 C CXX)
+
+project(OpenGL_Learning2026 LANGUAGES C CXX)
 
 # --- 1. C++23 CONFIGURATION ---
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-# Force GCC to enable module support
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_compile_options(-fmodules-ts)
 endif()
-# --- 2. INCLUDE DIRECTORIES ---
+
+# --- 2. SOURCE FILES ---
 set(SOURCE_FILES
         main.cpp
         core/src/glad.c
         stb.cpp
 )
-# --- 4. CREATE EXECUTABLE ---
-add_executable(OpenGL_Learning2026 ${SOURCE_FILES})
-# --- 5. ATTACH C++ MODULES ---
-target_sources(OpenGL_Learning2026
-        PUBLIC
-        FILE_SET CXX_MODULES FILES
+
+set(MODULE_INTERFACE_FILES
         GettingStarted.cppm
         Texture.cppm
         Camera.cppm
@@ -29,8 +28,9 @@ target_sources(OpenGL_Learning2026
         ebo.cppm
         TimeUtils.cppm
         Lighting.cppm
+)
 
-        PRIVATE
+set(MODULE_IMPLEMENTATION_FILES
         GettingStarted.cpp
         Texture.cpp
         Camera.cpp
@@ -39,26 +39,40 @@ target_sources(OpenGL_Learning2026
         vbo.cpp
         ebo.cpp
         Lighting.cpp
-
 )
-target_include_directories(OpenGL_Learning2026 PRIVATE ${CMAKE_SOURCE_DIR}/core/include)
-# --- 5. ASSET COPYING (Shaders & Textures) ---
-# This handles copying your folders to the build directory so the app can find them
-set(ASSET_FOLDERS "glsl" "pics")
 
-foreach(FOLDER ${ASSET_FOLDERS})
-    add_custom_command(
-            TARGET OpenGL_Learning2026 POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_CURRENT_SOURCE_DIR}/${FOLDER}
-            $<TARGET_FILE_DIR:OpenGL_Learning2026>/${FOLDER}
-            COMMENT "Syncing ${FOLDER} to build directory..."
-    )
-endforeach()
+# --- 3. CREATE EXECUTABLE ---
+add_executable(OpenGL_Learning2026)
 
-# --- 6. PLATFORM-SPECIFIC LINKING ---
+target_sources(OpenGL_Learning2026
+        PRIVATE
+        ${SOURCE_FILES}
+        ${MODULE_IMPLEMENTATION_FILES}
+        PUBLIC
+        FILE_SET CXX_MODULES FILES
+        ${MODULE_INTERFACE_FILES}
+)
+
+target_include_directories(OpenGL_Learning2026
+        PRIVATE
+        ${CMAKE_SOURCE_DIR}/core/include
+)
+
+# --- 4. ASSET SYNC TARGET ---
+add_custom_target(sync_assets ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/glsl
+        $<TARGET_FILE_DIR:OpenGL_Learning2026>/glsl
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/pics
+        $<TARGET_FILE_DIR:OpenGL_Learning2026>/pics
+        COMMENT "Syncing shader and texture assets..."
+)
+
+add_dependencies(OpenGL_Learning2026 sync_assets)
+
+# --- 5. PLATFORM-SPECIFIC LINKING ---
 if(WIN32)
-    # Windows-specific libraries and local GLFW .lib
     target_link_libraries(OpenGL_Learning2026
             PRIVATE
             "${CMAKE_SOURCE_DIR}/core/lib/glfw3.lib"
@@ -68,16 +82,17 @@ if(WIN32)
             shell32
     )
 else()
-    # Zorin OS / Linux native libraries
-    # IMPORTANT: Run 'sudo apt install libglfw3-dev libgl1-mesa-dev' first!
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(GLFW REQUIRED glfw3)
     find_package(OpenGL REQUIRED)
 
+    target_include_directories(OpenGL_Learning2026 PRIVATE ${GLFW_INCLUDE_DIRS})
+    target_link_directories(OpenGL_Learning2026 PRIVATE ${GLFW_LIBRARY_DIRS})
     target_link_libraries(OpenGL_Learning2026
             PRIVATE
             ${GLFW_LIBRARIES}
             OpenGL::GL
-            dl # Required for GLAD to load functions at runtime
+            dl
+            pthread
     )
 endif()
