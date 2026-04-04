@@ -54,6 +54,9 @@ int main()
         //lighting.tryPhong();
         //lighting.tryPhongMove();
         //lighting.tryPhongMoveShadingInViewSpace();
-        lighting.tryGouraud();
+        //lighting.tryGouraud();
+        //lighting.tryMaterial();
+        //lighting.tryChangeLightCubeAsWell();
+        lighting.tryRealWorldObjects();
         return 0;
 }

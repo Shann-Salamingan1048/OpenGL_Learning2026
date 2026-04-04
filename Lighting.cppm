@@ -22,6 +22,9 @@ export namespace Lighting
         void tryPhongMove();
         void tryPhongMoveShadingInViewSpace();
         void tryGouraud();
+        void tryMaterial();
+        void tryChangeLightCubeAsWell();
+        void tryRealWorldObjects();
     private:
         GLFWwindow* m_window;
         static void framebuffer_size_callback(GLFWwindow* window, int width, int height) noexcept;
