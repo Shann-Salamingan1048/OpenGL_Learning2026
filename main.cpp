@@ -57,6 +57,11 @@ int main()
         //lighting.tryGouraud();
         //lighting.tryMaterial();
         //lighting.tryChangeLightCubeAsWell();
-        lighting.tryRealWorldObjects();
+        //lighting.tryRealWorldObjects();
+        //lighting.tryLightingMaps();
+        //lighting.tryLightingMaps2();
+        //lighting.tryShineWoodNotMetal();
+        lighting.tryColoredSpecularMap();
+        //lighting.tryMatrix();
         return 0;
 }

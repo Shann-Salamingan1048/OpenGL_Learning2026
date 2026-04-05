@@ -25,6 +25,12 @@ export namespace Lighting
         void tryMaterial();
         void tryChangeLightCubeAsWell();
         void tryRealWorldObjects();
+        void tryLightingMaps();
+        void tryLightingMaps2();
+        void tryShineWoodNotMetal();
+        void tryColoredSpecularMap();
+        void tryMatrix();
+
     private:
         GLFWwindow* m_window;
         static void framebuffer_size_callback(GLFWwindow* window, int width, int height) noexcept;
