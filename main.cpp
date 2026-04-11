@@ -61,7 +61,10 @@ int main()
         //lighting.tryLightingMaps();
         //lighting.tryLightingMaps2();
         //lighting.tryShineWoodNotMetal();
-        lighting.tryColoredSpecularMap();
+        //lighting.tryColoredSpecularMap();
         //lighting.tryMatrix();
+        //lighting.tryDirectionalLights();
+        //lighting.tryPointLights();
+        lighting.trySpotlight();
         return 0;
 }

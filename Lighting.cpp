@@ -8,7 +8,6 @@ module;
 #include <string>
 #include <stb/stb_images.h>
 #include <print>
-#include <stb/stb_images.h>
 module Lighting;
 import Shader;
 import VAO;
@@ -17,6 +16,478 @@ import EBO;
 import Texture;
 
 using namespace Lighting;
+void Lightings::trySpotlight()
+{
+    glEnable(GL_DEPTH_TEST);
+    printCurrentUseGPU();
+    GLfloat vertices[] = {
+         // positions          // normals           // texture coords
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
+    };
+    glm::vec3 cubePositions[] =
+    {
+      glm::vec3( 0.0f,  0.0f,  0.0f),
+      glm::vec3( 2.0f,  5.0f, -15.0f),
+      glm::vec3(-1.5f, -2.2f, -2.5f),
+      glm::vec3(-3.8f, -2.0f, -12.3f),
+      glm::vec3( 2.4f, -0.4f, -3.5f),
+      glm::vec3(-1.7f,  3.0f, -7.5f),
+      glm::vec3( 1.3f, -2.0f, -2.5f),
+      glm::vec3( 1.5f,  2.0f, -2.5f),
+      glm::vec3( 1.5f,  0.2f, -1.5f),
+      glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+    Shader lightingShader("glsl/lighting/5.3.light_casters.vert", "glsl/lighting/5.3.light_casters.frag");
+    Shader lightCubeShader("glsl/lighting/5.1.light_cube.vert", "glsl/lighting/5.1.light_cube.frag");
+    VAO CubeVao;
+    VBO vbo(vertices, sizeof(vertices));
+
+    CubeVao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+    CubeVao.LinkAttrib(vbo, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    CubeVao.LinkAttrib(vbo, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+
+    VAO lightCubeVao;
+    lightCubeVao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+
+    std::string container2 = "pics/lightings/container2.png";
+    std::string container2spec = "pics/lightings/container2_specular.png";
+
+    Texture diffuseMap(container2.c_str(),GL_TEXTURE_2D ,GL_TEXTURE0,GL_UNSIGNED_BYTE, true);
+    Texture specularMap(container2spec.c_str(),GL_TEXTURE_2D ,GL_TEXTURE1,GL_UNSIGNED_BYTE, true);
+    lightingShader.use();
+    lightingShader.setInt("material.diffuse", 0);
+    lightingShader.setInt("material.specular", 1);
+
+    while (!isWindowRunning())
+    {
+        time.currentFrame = static_cast<float>(glfwGetTime());
+        time.deltaTime = time.currentFrame - time.lastFrame;
+        time.lastFrame = time.currentFrame;
+
+        processInput(m_window);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // be sure to activate shader when setting uniforms/drawing objects
+        auto cutOff = glm::cos(glm::radians(10.0f));
+
+        lightingShader.use();
+        lightingShader.setVec3("light.position", camera.Position);
+        lightingShader.setVec3("light.direction", camera.Front);
+        lightingShader.setFloat("light.cutOff", cutOff);
+        std::println("Cos: {}", cutOff);
+        lightingShader.setVec3("viewPos", camera.Position);
+        /*
+         * light.ambient = Ambient is like a global base light color applied everywhere
+         * light.diffuse = color kung asa ang light ma scattered
+         * light.specular = color sa shininess of the object
+         *
+         * light.constant = fixed at 1 to makes sure the denominator never gets smaller than 1
+         * light.linear = Controls how brightness decreases with distance in a straight-line way.
+         * linear.quadratic = Controls how brightness decreases faster as distance grows.
+         *
+         * Higher linear → light becomes more sensitive to distance (gradual fade)
+         * Higher quadratic → light dies off very quickly when far away
+         */
+
+         // light properties
+         lightingShader.setVec3("light.ambient", 0.1f, 0.1f, 0.1f);
+         // we configure the diffuse intensity slightly higher; the right lighting conditions differ with each lighting method and environment.
+         // each environment and lighting type requires some tweaking to get the best out of your environment.
+         lightingShader.setVec3("light.diffuse", 0.8f, 0.8f, 0.8f);
+         lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+         lightingShader.setFloat("light.constant", 1.0f);
+         lightingShader.setFloat("light.linear", 0.09f);
+         lightingShader.setFloat("light.quadratic", 0.032f);
+
+         // material properties
+         lightingShader.setFloat("material.shininess", 32.0f);
+
+         // view/projection transformations
+         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(m_width) / static_cast<float>(m_height), 0.1f, 100.0f);
+         glm::mat4 view = camera.GetViewMatrix();
+         lightingShader.setMat4("projection", projection);
+         lightingShader.setMat4("view", view);
+
+         // world transformation
+         auto model = glm::mat4(1.0f);
+         lightingShader.setMat4("model", model);
+
+         diffuseMap.Bind();
+         specularMap.Bind();
+         // render the cube
+         CubeVao.Bind();
+         for (int i = 0; i < 10; ++i)
+         {
+           model = glm::mat4(1.0f);
+           model = glm::translate(model, cubePositions[i]);
+           float angle = 20.0f * i;
+           model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f,0.3f,0.5f));
+           lightingShader.setMat4("model", model);
+           glDrawArrays(GL_TRIANGLES, 0, 36);
+         }
+         glfwSwapBuffers(m_window);
+         glfwPollEvents();
+
+    }
+    CubeVao.Delete();
+    lightCubeVao.Delete();
+    vbo.Delete();
+    lightCubeShader.deleteShader();
+    lightingShader.deleteShader();
+    diffuseMap.Delete();
+    specularMap.Delete();
+    glfwTerminate();
+}
+void Lightings::tryPointLights()
+{
+    glEnable(GL_DEPTH_TEST);
+    printCurrentUseGPU();
+    GLfloat vertices[] = {
+         // positions          // normals           // texture coords
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
+    };
+    glm::vec3 cubePositions[] =
+    {
+      glm::vec3( 0.0f,  0.0f,  0.0f),
+      glm::vec3( 2.0f,  5.0f, -15.0f),
+      glm::vec3(-1.5f, -2.2f, -2.5f),
+      glm::vec3(-3.8f, -2.0f, -12.3f),
+      glm::vec3( 2.4f, -0.4f, -3.5f),
+      glm::vec3(-1.7f,  3.0f, -7.5f),
+      glm::vec3( 1.3f, -2.0f, -2.5f),
+      glm::vec3( 1.5f,  2.0f, -2.5f),
+      glm::vec3( 1.5f,  0.2f, -1.5f),
+      glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+    Shader lightingShader("glsl/lighting/5.2.light_casters.vert", "glsl/lighting/5.2.light_casters.frag");
+    Shader lightCubeShader("glsl/lighting/5.1.light_cube.vert", "glsl/lighting/5.1.light_cube.frag");
+    VAO CubeVao;
+    VBO vbo(vertices, sizeof(vertices));
+
+    CubeVao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+    CubeVao.LinkAttrib(vbo, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    CubeVao.LinkAttrib(vbo, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+
+    VAO lightCubeVao;
+    lightCubeVao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+
+    std::string container2 = "pics/lightings/container2.png";
+    std::string container2spec = "pics/lightings/container2_specular.png";
+
+    Texture diffuseMap(container2.c_str(),GL_TEXTURE_2D ,GL_TEXTURE0,GL_UNSIGNED_BYTE, true);
+    Texture specularMap(container2spec.c_str(),GL_TEXTURE_2D ,GL_TEXTURE1,GL_UNSIGNED_BYTE, true);
+    lightingShader.use();
+    lightingShader.setInt("material.diffuse", 0);
+    lightingShader.setInt("material.specular", 1);
+
+    while (!isWindowRunning())
+    {
+        time.currentFrame = static_cast<float>(glfwGetTime());
+        time.deltaTime = time.currentFrame - time.lastFrame;
+        time.lastFrame = time.currentFrame;
+
+        processInput(m_window);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        auto t = static_cast<float>(glfwGetTime());
+        float radius = 5.0f;
+        glm::vec3 lightPos(
+                   std::cos(t) * radius,
+                   0.5f,
+                   std::sin(t) * radius
+               );
+     // be sure to activate shader when setting uniforms/drawing objects
+        lightingShader.use();
+        lightingShader.setVec3("light.position", lightPos);
+        lightingShader.setVec3("viewPos", camera.Position);
+       /*
+        * light.ambient = Ambient is like a global base light color applied everywhere
+        * light.diffuse = color kung asa ang light ma scattered
+        * light.specular = color sa shininess of the object
+        *
+        * light.constant = fixed at 1 to makes sure the denominator never gets smaller than 1
+        * light.linear = Controls how brightness decreases with distance in a straight-line way.
+        * linear.quadratic = Controls how brightness decreases faster as distance grows.
+        *
+        * Higher linear → light becomes more sensitive to distance (gradual fade)
+        * Higher quadratic → light dies off very quickly when far away
+        */
+        // light properties
+        lightingShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+        lightingShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+        lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+        lightingShader.setFloat("light.constant", 1.0f);
+        lightingShader.setFloat("light.linear", 0.09f);
+        lightingShader.setFloat("light.quadratic", 0.032f);
+
+        // material properties
+        lightingShader.setFloat("material.shininess", 32.0f);
+
+        // view/projection transformations
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(m_width) / static_cast<float>(m_height), 0.1f, 100.0f);
+        glm::mat4 view = camera.GetViewMatrix();
+        lightingShader.setMat4("projection", projection);
+        lightingShader.setMat4("view", view);
+
+        // world transformation
+        auto model = glm::mat4(1.0f);
+        lightingShader.setMat4("model", model);
+
+        diffuseMap.Bind();
+        specularMap.Bind();
+        // render the cube
+        CubeVao.Bind();
+        for (int i = 0; i < 10; ++i)
+        {
+          model = glm::mat4(1.0f);
+          model = glm::translate(model, cubePositions[i]);
+          float angle = 20.0f * i;
+          model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f,0.3f,0.5f));
+          lightingShader.setMat4("model", model);
+          glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+     // also draw the lamp object
+        lightCubeShader.use();
+        lightCubeShader.setMat4("projection", projection);
+        lightCubeShader.setMat4("view", view);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, lightPos);
+        model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
+        lightCubeShader.setMat4("model", model);
+
+        lightCubeVao.Bind();
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
+    }
+    CubeVao.Delete();
+    lightCubeVao.Delete();
+    vbo.Delete();
+    lightCubeShader.deleteShader();
+    lightingShader.deleteShader();
+    diffuseMap.Delete();
+    specularMap.Delete();
+    glfwTerminate();
+}
+void Lightings::tryDirectionalLights()
+{
+    glEnable(GL_DEPTH_TEST);
+    printCurrentUseGPU();
+    GLfloat vertices[] = {
+         // positions          // normals           // texture coords
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
+    };
+    glm::vec3 cubePositions[] =
+    {
+      glm::vec3( 0.0f,  0.0f,  0.0f),
+      glm::vec3( 2.0f,  5.0f, -15.0f),
+      glm::vec3(-1.5f, -2.2f, -2.5f),
+      glm::vec3(-3.8f, -2.0f, -12.3f),
+      glm::vec3( 2.4f, -0.4f, -3.5f),
+      glm::vec3(-1.7f,  3.0f, -7.5f),
+      glm::vec3( 1.3f, -2.0f, -2.5f),
+      glm::vec3( 1.5f,  2.0f, -2.5f),
+      glm::vec3( 1.5f,  0.2f, -1.5f),
+      glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+    Shader lightingShader("glsl/lighting/5.1.light_casters.vert", "glsl/lighting/5.1.light_casters.frag");
+    Shader lightCubeShader("glsl/lighting/5.1.light_cube.vert", "glsl/lighting/5.1.light_cube.frag");
+    VAO CubeVao;
+    VBO vbo(vertices, sizeof(vertices));
+
+    CubeVao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+    CubeVao.LinkAttrib(vbo, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    CubeVao.LinkAttrib(vbo, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+
+    VAO lightCubeVao;
+    lightCubeVao.LinkAttrib(vbo, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+
+    std::string container2 = "pics/lightings/container2.png";
+    Texture diffuseMap(container2.c_str(),GL_TEXTURE_2D ,GL_TEXTURE0,GL_UNSIGNED_BYTE, true);
+    std::string container2spec = "pics/lightings/container2_specular.png";
+    Texture specularMap(container2spec.c_str(),GL_TEXTURE_2D ,GL_TEXTURE1,GL_UNSIGNED_BYTE, true);
+    lightingShader.use();
+    lightingShader.setInt("material.diffuse", 0);
+    lightingShader.setInt("material.specular", 1);
+    while (!isWindowRunning())
+    {
+        time.currentFrame = static_cast<float>(glfwGetTime());
+        time.deltaTime = time.currentFrame - time.lastFrame;
+        time.lastFrame = time.currentFrame;
+
+        processInput(m_window);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+       lightingShader.use();
+       lightingShader.setVec3("light.direction", -0.2f, -1.0f, -0.3f);
+       lightingShader.setVec3("viewPos", camera.Position);
+
+        // light properties
+        // rgb
+        lightingShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f); // Ambient is like a global base light color applied everywhere
+        lightingShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f); // color kung asa ang light ma scattered
+        lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f); // color sa shininess of the object
+
+        // material properties
+        lightingShader.setFloat("material.shininess", 32.0f);
+
+        // view/projection transformations
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(m_width) / static_cast<float>(m_height), 0.1f, 100.0f);
+        glm::mat4 view = camera.GetViewMatrix();
+        lightingShader.setMat4("projection", projection);
+        lightingShader.setMat4("view", view);
+
+        // world transformation
+        auto model = glm::mat4(1.0f);
+        lightingShader.setMat4("model", model);
+
+        diffuseMap.Bind();
+        specularMap.Bind();
+        // render the cube
+        CubeVao.Bind();
+        for (int i = 0; i < 10; ++i)
+        {
+          model = glm::mat4(1.0f);
+          model = glm::translate(model, cubePositions[i]);
+          float angle = 20.0f * i;
+          model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f,0.3f,0.5f));
+          lightingShader.setMat4("model", model);
+          glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
+    }
+    CubeVao.Delete();
+    lightCubeVao.Delete();
+    vbo.Delete();
+    lightCubeShader.deleteShader();
+    lightingShader.deleteShader();
+    diffuseMap.Delete();
+    specularMap.Delete();
+    glfwTerminate();
+}
 void Lightings::tryMatrix()
 {
     glEnable(GL_DEPTH_TEST);
@@ -534,7 +1005,11 @@ void Lightings::tryLightingMaps2()
         lightingShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f); // Ambient is like a global base light color applied everywhere
         lightingShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f); // color kung asa ang light ma scattered
         lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f); // color sa shininess of the object
-
+        /*
+         * light.ambient = Ambient is like a global base light color applied everywhere
+         * light.diffuse = color kung asa ang light ma scattered
+         * light.specular = color sa shininess of the object
+         */
         // material properties
         lightingShader.setFloat("material.shininess", 64.0f);
 

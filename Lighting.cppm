@@ -30,11 +30,14 @@ export namespace Lighting
         void tryShineWoodNotMetal();
         void tryColoredSpecularMap();
         void tryMatrix();
+        void tryDirectionalLights();
+        void tryPointLights();
+        void trySpotlight(); // I still dont get the Spotlight
 
     private:
         GLFWwindow* m_window;
         static void framebuffer_size_callback(GLFWwindow* window, int width, int height) noexcept;
-        bool isWindowRunning() const noexcept{ return glfwWindowShouldClose(m_window);};
+        [[nodiscard]] bool isWindowRunning() const noexcept{ return glfwWindowShouldClose(m_window);};
         static void printCurrentUseGPU() noexcept;
         void processInput(GLFWwindow *window);
         static void mouse_callBack(GLFWwindow* window, double xpos, double ypos);
